@@ -1,56 +1,72 @@
-import { IUser } from './../models/users';
+import { IUser } from '../models/users'; // This should match your User schema interface
 import userModel from '../models/users';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
 interface LoginParams {
-  password: string;
   email: string;
+  password: string;
 }
 
-export async function Register({email,password,firstname,lastname}: IUser) {
-  const existingUser = await userModel.findOne({ email: email });
-  if (existingUser) {
-    return (
-      {
-        data:'the user already exit',
-        stauscode:400
-      })
-    }
-   const newUser=await bcrypt.hash(password,10)
-  const userToCreate = new userModel(newUser);
-  const savedUser = await userToCreate.save();
-  return (
-    {
-      data:genratetoken(
-    {
-  email
-    }
-       
+export async function Register({ email, password, firstname, lastname }: IUser) {
+  try {
+    const existingUser = await userModel.findOne({ email });
 
-      ),
-      stauscode:200
-    })
-}
+    if (existingUser) {
+      return {
+        data: 'The user already exists',
+        statuscode: 400,
+      };
+    }
 
-export async function Login({email,password}: LoginParams) {
-  const user = await userModel.findOne({ email: email });
-  if (user && await bcrypt.compare(password,user.password)) {
-    return (
-    {
-      data:genratetoken({
-        email
-      }),
-      stauscode:200
-    })
-    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const userToCreate = new userModel({
+      email,
+      password: hashedPassword,
+      firstname,
+      lastname,
+    });
+
+    const savedUser = await userToCreate.save();
+
+    return {
+      data: generateToken({ email: savedUser.email }),
+      statuscode: 200,
+    };
+  } catch (error) {
+    console.error("Register Error:", error);
+    return {
+      data: 'Something went wrong during registration',
+      statuscode: 500,
+    };
   }
-  return (
-    {
-      data:'invalid email or password',
-      stauscode:400
-    })
-  
 }
-function genratetoken(data:any){
-return jwt.sign(data,'asdkfcckdxcovekdcoekcovcke3ppss')
+
+export async function Login({ email, password }: LoginParams) {
+  try {
+    const user = await userModel.findOne({ email });
+
+    if (user && await bcrypt.compare(password, user.password)) {
+      return {
+        data: generateToken({ email: user.email }),
+        statuscode: 200,
+      };
+    }
+
+    return {
+      data: 'Invalid email or password',
+      statuscode: 400,
+    };
+  } catch (error) {
+    console.error("Login Error:", error);
+    return {
+      data: 'Something went wrong during login',
+      statuscode: 500,
+    };
+  }
+}
+
+function generateToken(data: any): string {
+  return jwt.sign(data, 'asdkfcckdxcovekdcoekcovcke3ppss', { expiresIn: '7d' });
 }

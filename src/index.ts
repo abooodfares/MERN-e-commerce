@@ -2,6 +2,8 @@ import  express  from 'express';
 import mongoose from 'mongoose';
 import router from './routers/userrouter';
 import { makefakeproduct } from './servcies/proudctservies';
+import proudectsrouter from './routers/proudctsrouter';
+import routercart from './routers/cartsoutes';
 
 mongoose.connect('mongodb://localhost:27017/ecommerce').then(() => {
     console.log('Connected to MongoDB');
@@ -15,8 +17,9 @@ mongoose.connect('mongodb://localhost:27017/ecommerce').then(() => {
  app.use(express.json());
  app.use('/users',router)
 
+app.use('/products',proudectsrouter)
+app.use('/carts',routercart)
 
- 
 
 
  app.listen(3000, () => {
