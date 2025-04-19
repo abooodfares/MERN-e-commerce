@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 export interface IProduct {
+    _id: mongoose.Types.ObjectId; 
     name: string,
     price: number,
    stock: number

@@ -7,7 +7,7 @@ enum statusenum{
     completd='completed'
 }
 interface proudct{
-    item:IProduct
+    item:IProduct |mongoose.Types.ObjectId 
     quantity:number
     unitprice:number
 }

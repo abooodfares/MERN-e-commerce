@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getuseractivecard } from "../servcies/cartservies";
+import { addnewproudct, getuseractivecard } from "../servcies/cartservies";
 import valditejwt from "../middleware/jwtvaldite";
 
 // typo fixed
@@ -15,5 +15,12 @@ routercart.get("/", valditejwt, async (req: any, res) => {
     res.status(200).send(activeCart);
  
 });
+routercart.post("/", valditejwt, async (req: any, res,) => {
+    const userid = req.user._id;
+    const {proudctid,quantity}=req.body
+    const proudct= await addnewproudct({userid,proudctid,quantity});
+    res.status(proudct.statuscode).send(proudct.data)
+
+})
 
 export default routercart;
