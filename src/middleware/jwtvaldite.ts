@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/users";
-
+import dotenv from 'dotenv';
 export interface AuthenticatedRequest extends Request {
   user?: any;
 }
@@ -21,7 +21,7 @@ const valditejwt =  (req: AuthenticatedRequest, res: Response, next: NextFunctio
     return;
   }
 
-  jwt.verify(token, "asdkfcckdxcovekdcoekcovcke3ppss", async (error, payload) => {
+  jwt.verify(token, process.env.JWT_SECRET || "", async (error, payload) => {
     if (error || !payload) {
     res.status(403).send("Invalid token");
       return;

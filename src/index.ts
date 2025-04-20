@@ -1,11 +1,13 @@
+import dotenv from 'dotenv';
+
 import  express  from 'express';
 import mongoose from 'mongoose';
 import router from './routers/userrouter';
 import { makefakeproduct } from './servcies/proudctservies';
 import proudectsrouter from './routers/proudctsrouter';
 import routercart from './routers/cartsoutes';
-
-mongoose.connect('mongodb://localhost:27017/ecommerce').then(() => {
+dotenv.config();
+mongoose.connect(process.env.Database_url ||'').then(() => {
     console.log('Connected to MongoDB');
 }).catch(() => {
     console.log('Failed to connect to MongoDB');
