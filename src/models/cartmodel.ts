@@ -2,7 +2,7 @@ import e from "express";
 import mongoose, { Schema } from "mongoose";
 import { IProduct } from "./proudctmodel";
 import { IUser } from "./users";
-enum statusenum{
+export enum statusenum{
     active='active',
     completd='completed'
 }

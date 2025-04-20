@@ -1,4 +1,7 @@
-import Cartmodel from "../models/cartmodel";
+import { IOrderitem } from './../models/ordermodel';
+
+import Cartmodel, { statusenum } from "../models/cartmodel";
+import Ordermodel from "../models/ordermodel";
 import Productmodel, { IProduct } from "../models/proudctmodel";
 
 const createnewcart = async (userid: string) => {
@@ -90,4 +93,119 @@ export const updatecart=async({userid,proudctid,quantity}:newproudct)=>{
     statuscode:201
   }
 
+}
+export interface newproudctdelte{
+  userid:string,
+  proudctid:String,
+
+}
+
+
+export const deleteitem=async({userid,proudctid}:newproudctdelte)=>{
+  const cart= await getuseractivecard({userid})
+  const exiestpro= cart.items.find(p => p.item._id.toString()===proudctid)
+  if(!exiestpro){
+    return {
+      data:'the proudct isnot there',
+      statuscode:400
+    }
+  }
+  cart.items = cart.items.filter(p => p.item._id.toString() == proudctid);
+  cart.totalprice = cart.items.reduce(
+    (acc, p) => acc + p.quantity * p.unitprice,
+    0
+  );
+
+  const updtedcart = await cart.save()
+  
+
+  return{
+    data:updtedcart,
+    statuscode:201
+  }
+
+}
+
+interface DeleteAllInput {
+  userid: string;
+}
+
+export const deleteAll = async ({ userid }: DeleteAllInput) => {
+  const cart = await getuseractivecard({ userid });
+
+  if (!cart) {
+    return {
+      data: 'Cart not found',
+      statuscode: 404
+    };
+  }
+
+  // Clear the items and reset total
+  cart.items = [];
+  cart.totalprice = 0;
+
+  // Ensure Mongoose detects the change
+  cart.markModified('items');
+
+  const updatedCart = await cart.save();
+
+  return {
+    data: updatedCart,
+    statuscode: 200
+  };
+};
+interface completeorder{
+  userid:string
+  address:string
+}
+export const completeorder = async ({ userid,address }:completeorder) => {
+  const cart = await getuseractivecard({ userid });
+  if (!cart) {
+    return {
+      data: 'Cart not found',
+      statuscode: 404
+    };
+
+  }
+  const orderitem: IOrderitem[] = [];
+
+  for (const item of cart.items) {
+    const proudct = await Productmodel.findById(item.item);
+    if (!proudct) {
+      return {
+        data: 'Proudct not found',
+        statuscode: 404
+      };
+    }
+    
+   orderitem.push({
+    itemname: proudct.name,
+    quantity: item.quantity,
+    price: item.unitprice
+
+   })
+  }
+  const order = await Ordermodel.create({
+    userid,
+    totalprice: cart.totalprice,
+    address,
+    items: orderitem
+  });
+  cart.status =statusenum.completd;
+for (const item of cart.items) {
+  const proudct = await Productmodel.findById(item.item);
+  if (!proudct) {
+    return {
+      data: 'Proudct not found',
+      statuscode: 404
+    };
+  }
+  proudct.stock -= item.quantity;
+  await proudct.save();
+}
+  await cart.save();
+  return {
+    data: order,
+    statuscode: 201
+  };
 }
