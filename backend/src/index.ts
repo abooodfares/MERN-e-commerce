@@ -6,6 +6,8 @@ import router from './routers/userrouter';
 import { makefakeproduct } from './servcies/proudctservies';
 import proudectsrouter from './routers/proudctsrouter';
 import routercart from './routers/cartsoutes';
+import cors from 'cors'
+
 dotenv.config();
 mongoose.connect(process.env.Database_url ||'').then(() => {
     console.log('Connected to MongoDB');
@@ -16,6 +18,7 @@ mongoose.connect(process.env.Database_url ||'').then(() => {
 
  const app = express();
  makefakeproduct()
+ app.use(cors());
  app.use(express.json());
  app.use('/users',router)
 
