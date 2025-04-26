@@ -10,7 +10,7 @@ export interface IUser extends mongoose.Document {
 const userSchema = new mongoose.Schema({
     firstname: {
         type: String,
-        required: true,
+       
         trim: true,
     },
     lastname: {

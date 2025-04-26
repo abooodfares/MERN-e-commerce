@@ -9,11 +9,13 @@ import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useauth } from '../context/auth/authcontext';
 
 const settings = ['Profile', 'Account', 'Logout'];
 
 function NavBar() {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const Auth = useauth();
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -24,6 +26,7 @@ function NavBar() {
   };
 
   return (
+    console.log('token'+Auth?.token),
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
