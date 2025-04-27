@@ -4,6 +4,8 @@ interface IAuthContext{
     email : string
     token : string
     login : (email : string , token : string) => void
+    logout : () => void
+  
 }
 export const Authcontext=createContext<IAuthContext| null>(null)
 export const useauth=()=>useContext(Authcontext)

@@ -1,14 +1,12 @@
 import React, { useRef } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
-import { RegisterUser } from '../api/Authapi';
-import { Userinterface } from '../types/userinterface';
+import { LoginUser, RegisterUser } from '../api/Authapi';
+import { LoginParams, Userinterface } from '../types/userinterface';
 import { useauth } from '../context/auth/authcontext';
 import { useNavigate } from 'react-router-dom';
 
-export const RegisterPage = () => {
-  const Navigate = useNavigate();
-  const firstNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
+export const LoginPage = () => {
+const Navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const Auth= useauth();
@@ -17,19 +15,18 @@ export const RegisterPage = () => {
     e.preventDefault();
 
     const data = {
-      firstName: firstNameRef.current?.value || '',
-      lastName: lastNameRef.current?.value || '',
+
       email: emailRef.current?.value || '',
       password: passwordRef.current?.value || '',
     };
-    const user: Userinterface = {
+    const user: LoginParams = {
       email: data.email,
       password: data.password,
-      firstname: data.firstName,
-      lastname: data.lastName,
+
+    
     };
 
-    const response = await RegisterUser(user);
+    const response = await LoginUser(user);
 
     if (response.ok) {
       const responseData = await response.json();
@@ -48,30 +45,10 @@ export const RegisterPage = () => {
     <Container maxWidth="sm">
       <Box sx={{ mt: 8 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Register Page
+      Login Page
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            inputRef={firstNameRef}
-            margin="normal"
-            required
-            fullWidth
-            id="firstName"
-            label="First Name"
-            name="firstName"
-            autoComplete="given-name"
-            autoFocus
-          />
-          <TextField
-            inputRef={lastNameRef}
-            margin="normal"
-            required
-            fullWidth
-            id="lastName"
-            label="Last Name"
-            name="lastName"
-            autoComplete="family-name"
-          />
+          
           <TextField
             inputRef={emailRef}
             margin="normal"
@@ -99,9 +76,9 @@ export const RegisterPage = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Register
+            Login
           </Button>
-          <p>Already have an account? <a href="/login">Login</a></p>
+ <p>Dont have an account? <a href="/register">Register</a></p>
         </Box>
       </Box>
     </Container>

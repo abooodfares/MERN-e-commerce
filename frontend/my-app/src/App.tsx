@@ -3,6 +3,7 @@ import { HomePage } from "./pages/homepage"
 import Navbar from "./components/Navbar"
 import { RegisterPage } from "./pages/RegisterPage"
 import { AuthProvider } from "./context/auth/authprovider"
+import { LoginPage } from "./pages/LoginPage"
 
 
 
@@ -18,6 +19,7 @@ function App() {
     <Routes>
         <Route path="/" element={<HomePage/>} />
         <Route path="/register" element={<RegisterPage/> } />
+        <Route path="/login" element={<LoginPage/> } />
     
       </Routes>
   </BrowserRouter>

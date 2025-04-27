@@ -6,3 +6,7 @@ export interface Userinterface {
     lastname: string
   
 }
+export interface LoginParams {
+    email: string;
+    password: string;
+  }

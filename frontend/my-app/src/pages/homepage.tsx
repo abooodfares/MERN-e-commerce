@@ -3,13 +3,14 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid'; // correct import
 import ProudctCard from '../components/ProudctCard'; // keeping your file name ProudctCard
 import { Product } from '../types/Productinterface';
+import { BASE_URL } from '../constant/myconst';
 
 export const HomePage = () => {
   const [products, setProducts] = React.useState<Product[]>([]);
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/products');
+      const response = await fetch(BASE_URL+'/products');
       const data = await response.json();
       setProducts(data);
       console.log(data);
