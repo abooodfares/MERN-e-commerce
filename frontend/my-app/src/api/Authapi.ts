@@ -17,3 +17,11 @@ export const LoginUser = async (data: LoginParams) => await fetch(BASE_URL+'/use
     },
     body: JSON.stringify(data),
 });
+
+export const GetCartItems = async (token: string) => await fetch(BASE_URL+'/carts', {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+});

@@ -9,6 +9,8 @@ import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Badge from '@mui/material/Badge';
 import { useauth } from '../context/auth/authcontext';
 import { Button, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +35,7 @@ function NavBar() {
   };
 
   return (
+
     <>
       <AppBar position="static">
         <Container maxWidth="xl">
@@ -60,6 +63,15 @@ function NavBar() {
 
             {/* Spacer */}
             <Box sx={{ flexGrow: 1 }} />
+
+            {/* Cart Icon */}
+            <Box sx={{ mr: 2 }}>
+              <IconButton size="large" color="inherit" onClick={() => navigate('/cart')}>
+                <Badge badgeContent={1} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+            </Box>
 
             {/* Profile or Login Button */}
             <Box sx={{ flexGrow: 0 }}>
@@ -104,6 +116,7 @@ function NavBar() {
             </Box>
           </Toolbar>
         </Container>
+        
       </AppBar>
     </>
   );
