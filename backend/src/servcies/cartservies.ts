@@ -14,7 +14,12 @@ interface UserActiveCart {
 }
 
 export const getuseractivecard = async ({ userid }: UserActiveCart) => {
-  let existuser = await Cartmodel.findOne({ userid, status: 'active' });
+  let existuser = await Cartmodel.findOne({ userid, status: 'active' })
+    .populate({
+      path: 'items.item',
+      model: 'Products',
+      select: 'name price image stock'
+    });
 
   if (!existuser) {
     existuser = await createnewcart(userid);
@@ -22,7 +27,8 @@ export const getuseractivecard = async ({ userid }: UserActiveCart) => {
 
   return existuser;
 };
-  export interface newproudct{
+
+export interface newproudct{
   userid:string,
   proudctid:String,
   quantity:number
@@ -44,24 +50,31 @@ export const addnewproudct = async ({ userid,proudctid, quantity }: newproudct) 
       statuscode:400
     }
   }
-  if(proudct. stock<quantity){
+  if(proudct.stock<quantity){
     return {
       data:'item over stock',
       statuscode:400
     }
   }
   cart.totalprice+= quantity*proudct.price
-cart.items.push({
-item: proudct._id ,
-  quantity:quantity,
-unitprice: proudct.price
-});
+  cart.items.push({
+    item: proudct._id,
+    quantity: quantity,
+    unitprice: proudct.price
+  });
   const updtedcart = await cart.save()
+  const populatedCart = await Cartmodel.findById(updtedcart._id)
+  .populate({
+    path: 'items.item',
+    model: 'Products',
+    select: 'name price image stock'
+  });
   return{
-    data:updtedcart,
+    data:populatedCart,
     statuscode:201
   }
 };
+
 export const updatecart=async({userid,proudctid,quantity}:newproudct)=>{
   const cart= await getuseractivecard({userid})
   const exiestpro= cart.items.find(p => p.item._id.toString()===proudctid)
@@ -94,6 +107,7 @@ export const updatecart=async({userid,proudctid,quantity}:newproudct)=>{
   }
 
 }
+
 export interface newproudctdelte{
   userid:string,
   proudctid:String,
@@ -154,10 +168,12 @@ export const deleteAll = async ({ userid }: DeleteAllInput) => {
     statuscode: 200
   };
 };
+
 interface completeorder{
   userid:string
   address:string
 }
+
 export const completeorder = async ({ userid,address }:completeorder) => {
   const cart = await getuseractivecard({ userid });
   if (!cart) {
@@ -192,17 +208,18 @@ export const completeorder = async ({ userid,address }:completeorder) => {
     items: orderitem
   });
   cart.status =statusenum.completd;
-for (const item of cart.items) {
-  const proudct = await Productmodel.findById(item.item);
-  if (!proudct) {
-    return {
-      data: 'Proudct not found',
-      statuscode: 404
-    };
+
+  for (const item of cart.items) {
+    const proudct = await Productmodel.findById(item.item);
+    if (!proudct) {
+      return {
+        data: 'Proudct not found',
+        statuscode: 404
+      };
+    }
+    proudct.stock -= item.quantity;
+    await proudct.save();
   }
-  proudct.stock -= item.quantity;
-  await proudct.save();
-}
   await cart.save();
   return {
     data: order,

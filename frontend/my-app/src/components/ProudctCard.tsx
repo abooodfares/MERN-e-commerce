@@ -6,12 +6,15 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Product } from '../types/Productinterface';
+import { useCart } from '../context/cart/cartcontext';
 
 interface ProductCardProps extends Product {}
 
-export default function ProductCard({ image, name, price, stock }: ProductCardProps) {
+export default function ProductCard({ image, name, price, stock,_id }: ProductCardProps) {
+  const { addProduct } = useCart();
   return (
     <Card
+
       sx={{
         minWidth: 345,
         display: 'flex',
@@ -39,6 +42,7 @@ export default function ProductCard({ image, name, price, stock }: ProductCardPr
       </CardContent>
       <CardActions sx={{ justifyContent: 'center' }}>
         <Button
+          onClick={() => addProduct(_id)}
           sx={{ mt: 1 }}
           disabled={stock === 0}
           variant="contained"

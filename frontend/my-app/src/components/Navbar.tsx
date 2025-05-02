@@ -14,10 +14,13 @@ import Badge from '@mui/material/Badge';
 import { useauth } from '../context/auth/authcontext';
 import { Button, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
+import { useCart } from '../context/cart/cartcontext';
+import { GetCartItems } from '../api/Authapi';
 const settings = ['My Orders', 'Account', 'Logout'];
 
+
 function NavBar() {
+  const { products } = useCart();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const Auth = useauth();
   const navigate = useNavigate();
@@ -30,7 +33,8 @@ function NavBar() {
     setAnchorElUser(null);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    
     navigate('/login'); // or navigate programmatically if you use react-router
   };
 
@@ -67,7 +71,7 @@ function NavBar() {
             {/* Cart Icon */}
             <Box sx={{ mr: 2 }}>
               <IconButton size="large" color="inherit" onClick={() => navigate('/cart')}>
-                <Badge badgeContent={1} color="error">
+                <Badge badgeContent={products.length} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>

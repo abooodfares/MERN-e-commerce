@@ -25,3 +25,13 @@ export const GetCartItems = async (token: string) => await fetch(BASE_URL+'/cart
         'Authorization': `Bearer ${token}`,
     },
 });
+
+export const AddCartItem = async (token: string, data: any) => await fetch(BASE_URL+'/carts', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+});
+
