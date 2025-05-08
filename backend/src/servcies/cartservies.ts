@@ -101,8 +101,14 @@ export const updatecart=async({userid,proudctid,quantity}:newproudct)=>{
   exiestpro.quantity=quantity
 
   const updtedcart = await cart.save()
+  const populatedCart = await Cartmodel.findById(updtedcart._id)
+  .populate({
+    path: 'items.item',
+    model: 'Products',
+    select: 'name price image stock'
+  });
   return{
-    data:updtedcart,
+    data:populatedCart,
     statuscode:201
   }
 
@@ -131,10 +137,16 @@ export const deleteitem=async({userid,proudctid}:newproudctdelte)=>{
   );
 
   const updtedcart = await cart.save()
+  const populatedCart = await Cartmodel.findById(updtedcart._id)
+  .populate({
+    path: 'items.item',
+    model: 'Products',
+    select: 'name price image stock'
+  });
   
 
   return{
-    data:updtedcart,
+    data:populatedCart,
     statuscode:201
   }
 
@@ -162,9 +174,15 @@ export const deleteAll = async ({ userid }: DeleteAllInput) => {
   cart.markModified('items');
 
   const updatedCart = await cart.save();
+  const populatedCart = await Cartmodel.findById(updatedCart._id)
+  .populate({
+    path: 'items.item',
+    model: 'Products',
+    select: 'name price image stock'
+  });
 
   return {
-    data: updatedCart,
+    data: populatedCart,
     statuscode: 200
   };
 };

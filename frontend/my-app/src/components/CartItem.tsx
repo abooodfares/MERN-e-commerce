@@ -3,12 +3,14 @@ import { ProductCart } from "../types"
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import { useCart } from "../context/cart/cartcontext";
 
 interface CartItemProps {
     item: ProductCart;
 }
 
 export const CartItem = ({ item }: CartItemProps) => {
+    const { updateProduct } = useCart();
     return (
         <Box sx={{ 
             display: 'flex', 
@@ -51,7 +53,7 @@ export const CartItem = ({ item }: CartItemProps) => {
                             }
                         }}
                     >
-                        <RemoveIcon />
+                        <RemoveIcon onClick={() => updateProduct(item._id, item.quantity - 1)} />
                     </IconButton>
                     <Typography variant="body1" sx={{ minWidth: '30px', textAlign: 'center' }}>
                         {item.quantity}
@@ -67,7 +69,7 @@ export const CartItem = ({ item }: CartItemProps) => {
                             }
                         }}
                     >
-                        <AddIcon />
+                        <AddIcon onClick={() => updateProduct(item._id, item.quantity + 1)} />
                     </IconButton>
                 </Box>
             </Box>

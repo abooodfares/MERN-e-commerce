@@ -34,4 +34,12 @@ export const AddCartItem = async (token: string, data: any) => await fetch(BASE_
     },
     body: JSON.stringify(data),
 });
+export const UpdateCartItem = async (token: string, proudctid: string, quantity: number) => await fetch(BASE_URL+'/carts', {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({proudctid, quantity}),
+});
 

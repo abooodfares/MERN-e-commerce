@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { ProductCart } from '../../types';
-import { AddCartItem, GetCartItems } from '../../api/Authapi';
+import { AddCartItem, GetCartItems, UpdateCartItem } from '../../api/Authapi';
 import { useauth } from '../auth/authcontext';
 
 interface CartContextType {
   products: ProductCart[];
   totalPrice: number;
   addProduct: (productId: string) => void;
+  updateProduct: (proudctid: string, quantity: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -77,11 +78,38 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
+  const updateProduct = async (proudctid: string, quantity: number) => {
+    if(quantity<1){
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await UpdateCartItem(Auth!.token, proudctid, quantity);
+      const data = await response.json();
+      setTotalPrice(data['totalprice']);
+      
+      // Update products with the new cart items
+      const cartItems = data.items?.map((item: any) => ({
+        _id: item.item._id,
+        name: item.item.name,
+        unitPrice: item.unitprice,
+        quantity: item.quantity,
+        img: item.item.image
+      })) || [];
+      setProducts(cartItems);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   const value = {
     products,
     totalPrice,
-    addProduct
+    addProduct,
+    updateProduct
   };
 
   return (
