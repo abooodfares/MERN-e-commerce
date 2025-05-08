@@ -4,7 +4,7 @@ import { useauth } from "../context/auth/authcontext"
 import { CartItem } from "../components/CartItem"
 
 export const CartPage = () => {
-    const { products, totalPrice } = useCart();
+    const { products, totalPrice, deleteAll } = useCart();
     const Auth = useauth();
 
     if (!Auth?.token) {
@@ -35,9 +35,19 @@ export const CartPage = () => {
                 <Typography variant="h5" sx={{ mb: 2 }}>
                     Total: {totalPrice} Riyal
                 </Typography>
-                <Button variant="contained" color="primary" size="large">
-                    Proceed to Checkout
-                </Button>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                    <Button 
+                        variant="contained" 
+                        color="error" 
+                        size="large"
+                        onClick={deleteAll}
+                    >
+                        Delete All
+                    </Button>
+                    <Button variant="contained" color="primary" size="large">
+                        Proceed to Checkout
+                    </Button>
+                </Box>
             </Box>
         </Container>
     );

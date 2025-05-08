@@ -10,7 +10,7 @@ interface CartItemProps {
 }
 
 export const CartItem = ({ item }: CartItemProps) => {
-    const { updateProduct } = useCart();
+    const { updateProduct, deleteProduct } = useCart();
     return (
         <Box sx={{ 
             display: 'flex', 
@@ -86,7 +86,7 @@ export const CartItem = ({ item }: CartItemProps) => {
                         }
                     }}
                 >
-                    <DeleteIcon />
+                    <DeleteIcon onClick={() => deleteProduct(item._id)} />
                 </IconButton>
             </Box>
         </Box>

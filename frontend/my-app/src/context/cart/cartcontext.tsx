@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { ProductCart } from '../../types';
-import { AddCartItem, GetCartItems, UpdateCartItem } from '../../api/Authapi';
+import { AddCartItem, DeleteCartItem, GetCartItems, UpdateCartItem, DeleteAllCartItems } from '../../api/Authapi';
 import { useauth } from '../auth/authcontext';
 
 interface CartContextType {
@@ -8,6 +8,8 @@ interface CartContextType {
   totalPrice: number;
   addProduct: (productId: string) => void;
   updateProduct: (proudctid: string, quantity: number) => void;
+  deleteProduct: (proudctid: string) => void;
+  deleteAll: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -103,18 +105,55 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
-  
+  const deleteProduct = async (proudctid: string) => {
+    setIsLoading(true);
+    try {
+      const response = await DeleteCartItem(Auth!.token, proudctid);
+      const data = await response.json();
+      setTotalPrice(data['totalprice']);
+      const cartItems = data.items?.map((item: any) => ({
+        _id: item.item._id,
+        name: item.item.name,
+        unitPrice: item.unitprice,
+        quantity: item.quantity,
+        img: item.item.image
+      })) || [];
+      setProducts(cartItems);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const deleteAll = async () => {
+    setIsLoading(true); 
+    try {
+      const response = await DeleteAllCartItems(Auth!.token);
+      const data = await response.json();
+      setTotalPrice(data['totalprice']);
+      setProducts([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const value = {
     products,
     totalPrice,
     addProduct,
-    updateProduct
+    updateProduct,
+    deleteProduct,
+    deleteAll
   };
+  
 
   return (
     <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
-}; 
+};
+
+

@@ -57,7 +57,7 @@ routercart.put("/", valditejwt, async (req: AuthenticatedRequest, res: Response)
     }
 });
 
-routercart.delete("/:id", valditejwt, async (req: AuthenticatedRequest, res: Response) => {
+routercart.delete("/", valditejwt, async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userid = req.user._id;
         const { proudctid } = req.body;

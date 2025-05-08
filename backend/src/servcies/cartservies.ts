@@ -159,30 +159,17 @@ interface DeleteAllInput {
 export const deleteAll = async ({ userid }: DeleteAllInput) => {
   const cart = await getuseractivecard({ userid });
 
-  if (!cart) {
-    return {
-      data: 'Cart not found',
-      statuscode: 404
-    };
-  }
-
   // Clear the items and reset total
   cart.items = [];
   cart.totalprice = 0;
 
-  // Ensure Mongoose detects the change
-  cart.markModified('items');
-
   const updatedCart = await cart.save();
-  const populatedCart = await Cartmodel.findById(updatedCart._id)
-  .populate({
-    path: 'items.item',
-    model: 'Products',
-    select: 'name price image stock'
-  });
 
   return {
-    data: populatedCart,
+    data: {
+      items: [],
+      totalprice: 0
+    },
     statuscode: 200
   };
 };
