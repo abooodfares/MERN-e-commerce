@@ -15,9 +15,8 @@ import { useauth } from '../context/auth/authcontext';
 import { Button, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/cart/cartcontext';
-import { GetCartItems } from '../api/Authapi';
-const settings = ['My Orders', 'Account', 'Logout'];
 
+const settings = ['My Orders', 'Account', 'Logout'];
 
 function NavBar() {
   const { products } = useCart();
@@ -34,41 +33,37 @@ function NavBar() {
   };
 
   const handleLogin = async () => {
-    
-    navigate('/login'); // or navigate programmatically if you use react-router
+    navigate('/login');
+  };
+
+  const handleHome = () => {
+    navigate('/');
   };
 
   return (
-
     <>
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            {/* Logo Icon */}
-            <AdbIcon sx={{ display: 'flex', mr: 1 }} />
-
-            {/* Logo Text */}
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="/"
+            <Button
+              onClick={handleHome}
+              variant="contained"
+              color="secondary"
+              startIcon={<AdbIcon />}
               sx={{
                 mr: 2,
                 fontFamily: 'monospace',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
-                color: 'inherit',
-                textDecoration: 'none',
+                textTransform: 'none',
+                fontSize: '1.25rem'
               }}
             >
               LOGO
-            </Typography>
+            </Button>
 
-            {/* Spacer */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Cart Icon */}
             <Box sx={{ mr: 2 }}>
               <IconButton size="large" color="inherit" onClick={() => navigate('/cart')}>
                 <Badge badgeContent={products.length} color="error">
@@ -77,7 +72,6 @@ function NavBar() {
               </IconButton>
             </Box>
 
-            {/* Profile or Login Button */}
             <Box sx={{ flexGrow: 0 }}>
               {Auth?.email ? (
                 <Tooltip title={Auth.email}>
@@ -93,7 +87,6 @@ function NavBar() {
                 </Button>
               )}
 
-              {/* Only show Menu if logged in */}
               {Auth?.email && (
                 <Menu
                   sx={{ mt: '45px' }}
@@ -110,17 +103,14 @@ function NavBar() {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                 
-                    <MenuItem key={'logout'} onClick={Auth.logout}>
-                      <Typography textAlign="center">{'Logout'}</Typography>
-                    </MenuItem>
-                
+                  <MenuItem key={'logout'} onClick={Auth.logout}>
+                    <Typography textAlign="center">{'Logout'}</Typography>
+                  </MenuItem>
                 </Menu>
               )}
             </Box>
           </Toolbar>
         </Container>
-        
       </AppBar>
     </>
   );

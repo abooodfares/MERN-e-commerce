@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { ProductCart } from '../../types';
-import { AddCartItem } from '../../api/Authapi';
+import { AddCartItem, GetCartItems } from '../../api/Authapi';
 import { useauth } from '../auth/authcontext';
 
 interface CartContextType {
@@ -29,40 +29,59 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Fetch initial cart items
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      if (!Auth?.token) return;
+      try {
+        const response = await GetCartItems(Auth.token);
+        const data = await response.json();
+        setTotalPrice(data.totalprice || 0);
+        const cartItems = data.items?.map((item: any) => ({
+          _id: item.item._id,
+          name: item.item.name,
+          unitPrice: item.unitprice,
+          quantity: item.quantity,
+          img: item.item.image
+        })) || [];
+        setProducts(cartItems);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
+    };
+
+    fetchCartItems();
+  }, [Auth?.token]);
 
   const addProduct = async (proudctid: string) => {
     setIsLoading(true);
     try {
-      const response = await AddCartItem(Auth!.token, {proudctid, quantity: 1})
+      const response = await AddCartItem(Auth!.token, {proudctid, quantity: 1});
       const data = await response.json();
       setTotalPrice(data['totalprice']);
-     data['items'].forEach((item: any) => {
-      const newproduct = {
+      
+      // Update products with the new cart items
+      const cartItems = data.items?.map((item: any) => ({
         _id: item.item._id,
         name: item.item.name,
-        unitPrice:  item.unitprice,
+        unitPrice: item.unitprice,
         quantity: item.quantity,
         img: item.item.image
-      }
-  
-      setProducts([...products, newproduct]);
-     });
-  
+      })) || [];
+      setProducts(cartItems);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-
   };
 
   const value = {
     products,
     totalPrice,
     addProduct
-
   };
 
   return (
