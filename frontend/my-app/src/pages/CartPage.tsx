@@ -2,9 +2,10 @@ import { Container, Typography, Box, Button } from "@mui/material"
 import { useCart } from "../context/cart/cartcontext"
 import { useauth } from "../context/auth/authcontext"
 import { CartItem } from "../components/CartItem"
-
+import { useNavigate } from "react-router-dom";
 export const CartPage = () => {
-    const { products, totalPrice, deleteAll } = useCart();
+    const navigate = useNavigate();
+    const { products, totalPrice, deleteAll} = useCart();
     const Auth = useauth();
 
     if (!Auth?.token) {
@@ -20,8 +21,11 @@ export const CartPage = () => {
             </Container>
         );
     }
+    
+    
 
     return (
+     
         <Container sx={{ py: 4 }}>
             <Typography variant="h4" sx={{ mb: 4 }}>
                 Shopping Cart
@@ -44,7 +48,7 @@ export const CartPage = () => {
                     >
                         Delete All
                     </Button>
-                    <Button variant="contained" color="primary" size="large">
+                    <Button  variant="contained" color="primary" size="large" onClick={() => navigate('/checkout')}>
                         Proceed to Checkout
                     </Button>
                 </Box>

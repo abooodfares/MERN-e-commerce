@@ -103,6 +103,9 @@ function NavBar() {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
+                  <MenuItem key={'orders'} onClick={() => { navigate('/orders'); handleCloseUserMenu(); }}>
+                    <Typography textAlign="center">My Orders</Typography>
+                  </MenuItem>
                   <MenuItem key={'logout'} onClick={Auth.logout}>
                     <Typography textAlign="center">{'Logout'}</Typography>
                   </MenuItem>

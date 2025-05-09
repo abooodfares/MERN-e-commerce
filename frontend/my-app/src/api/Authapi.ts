@@ -58,3 +58,11 @@ export const DeleteAllCartItems = async (token: string) => await fetch(BASE_URL+
     },
 });
 
+export const CompleteOrder = async (token: string, data: { address: string }) => await fetch(BASE_URL+'/carts/complete', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+});

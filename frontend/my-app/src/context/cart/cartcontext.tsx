@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { ProductCart } from '../../types';
-import { AddCartItem, DeleteCartItem, GetCartItems, UpdateCartItem, DeleteAllCartItems } from '../../api/Authapi';
+import { AddCartItem, DeleteCartItem, GetCartItems, UpdateCartItem, DeleteAllCartItems, CompleteOrder } from '../../api/Authapi';
 import { useauth } from '../auth/authcontext';
-
+interface IOrderitem {
+  itemname: string;
+  quantity: number;
+  price: number;
+}
+interface IOrder {
+  totalprice: number;
+  address: string;
+  items: IOrderitem[];
+}
 interface CartContextType {
   products: ProductCart[];
   totalPrice: number;
@@ -10,7 +19,10 @@ interface CartContextType {
   updateProduct: (proudctid: string, quantity: number) => void;
   deleteProduct: (proudctid: string) => void;
   deleteAll: () => void;
+  completeOrder: (address: string) => void;
+  order: IOrder;
 }
+
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -27,11 +39,17 @@ interface CartProviderProps {
 }
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+
   const Auth = useauth();
   const [products, setProducts] = useState<ProductCart[]>([]);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [order, setOrder] = useState<IOrder>({
+    address: '',
+    items: [],
+    totalprice: 0
+  });
 
   // Fetch initial cart items
   useEffect(() => {
@@ -139,13 +157,31 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
+  const completeOrder = async (address: string) => {
+    setIsLoading(true);
+    try {
+      const response = await CompleteOrder(Auth!.token, { address });
+      const data = await response.json();
+     setOrder(data);
+      setTotalPrice(0);
+      setProducts([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   const value = {
     products,
     totalPrice,
     addProduct,
     updateProduct,
     deleteProduct,
-    deleteAll
+    deleteAll,
+    completeOrder,
+    order
   };
   
 
