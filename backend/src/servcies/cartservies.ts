@@ -230,4 +230,11 @@ export const completeorder = async ({ userid,address }:completeorder) => {
     data: order,
     statuscode: 201
   };
+
+}
+
+export const getallcompletedorders=async({userid}:{userid:string})=>{
+  const orders=await Ordermodel.find({userid})
+  return orders
+
 }

@@ -1,4 +1,4 @@
-import { completeorder } from './../servcies/cartservies';
+import { completeorder, getallcompletedorders } from './../servcies/cartservies';
 import { AuthenticatedRequest } from './../middleware/jwtvaldite';
 import express, { Request, Response } from "express";
 import { addnewproudct, deleteAll, deleteitem, getuseractivecard, updatecart } from "../servcies/cartservies";
@@ -91,5 +91,17 @@ routercart.post("/complete", valditejwt, async (req: AuthenticatedRequest, res: 
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
+
+routercart.get("/orders", valditejwt, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userid = req.user._id;
+        const orders = await getallcompletedorders({ userid });
+        res.status(200).send(orders);
+    } catch (error: any) {
+        console.error("GET /carts/orders Error:", error);
+        res.status(500).send({ error: "Internal Server Error", details: error.message });
+    }
+});
+
 
 export default routercart;

@@ -66,3 +66,11 @@ export const CompleteOrder = async (token: string, data: { address: string }) =>
     },
     body: JSON.stringify(data),
 });
+
+export const GetAllCompletedOrders = async (token: string) => await fetch(BASE_URL+'/carts/orders', {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+});

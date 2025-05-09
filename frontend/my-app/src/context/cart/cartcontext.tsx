@@ -7,7 +7,7 @@ interface IOrderitem {
   quantity: number;
   price: number;
 }
-interface IOrder {
+ export interface IOrder {
   totalprice: number;
   address: string;
   items: IOrderitem[];
