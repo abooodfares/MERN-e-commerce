@@ -179,59 +179,68 @@ interface completeorder{
   address:string
 }
 
-export const completeorder = async ({ userid,address }:completeorder) => {
+export const completeorder = async ({ userid, address }: completeorder) => {
   const cart = await getuseractivecard({ userid });
+
   if (!cart) {
     return {
       data: 'Cart not found',
       statuscode: 404
     };
-
   }
+
   const orderitem: IOrderitem[] = [];
 
+  // 👇 تحقق من توفر المنتجات وخصم الكمية بشكل ذري
   for (const item of cart.items) {
-    const proudct = await Productmodel.findById(item.item);
+    const productUpdate = await Productmodel.updateOne(
+      { _id: item.item, stock: { $gte: item.quantity } },
+      { $inc: { stock: -item.quantity } }
+    );
+
+    if (productUpdate.modifiedCount === 0) {
+      return {
+        data: `Product with ID ${item.item} is out of stock`,
+        statuscode: 400
+      };
+    }
+
+    const proudct = await Productmodel.findById(item.item); // فقط لجلب اسم المنتج والسعر
     if (!proudct) {
       return {
-        data: 'Proudct not found',
+        data: 'Product not found',
         statuscode: 404
       };
     }
-    
-   orderitem.push({
-    itemname: proudct.name,
-    quantity: item.quantity,
-    price: item.unitprice
 
-   })
+    orderitem.push({
+      itemname: proudct.name,
+      quantity: item.quantity,
+      price: item.unitprice
+    });
   }
+
+  // 🧾 إنشاء الطلب بعد التأكد من توفر كل المنتجات
   const order = await Ordermodel.create({
     userid,
     totalprice: cart.totalprice,
     address,
     items: orderitem
   });
-  cart.status =statusenum.completd;
 
-  for (const item of cart.items) {
-    const proudct = await Productmodel.findById(item.item);
-    if (!proudct) {
-      return {
-        data: 'Proudct not found',
-        statuscode: 404
-      };
-    }
-    proudct.stock -= item.quantity;
-    await proudct.save();
-  }
+  // ✅ تحديث حالة السلة
+  cart.status = statusenum.completd;
   await cart.save();
+
   return {
     data: order,
     statuscode: 201
   };
+};
 
-}
+
+
+
 
 export const getallcompletedorders=async({userid}:{userid:string})=>{
   const orders=await Ordermodel.find({userid})
