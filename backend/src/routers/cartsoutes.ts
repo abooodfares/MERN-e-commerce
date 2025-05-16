@@ -3,8 +3,20 @@ import { AuthenticatedRequest } from './../middleware/jwtvaldite';
 import express, { Request, Response } from "express";
 import { addnewproudct, deleteAll, deleteitem, getuseractivecard, updatecart } from "../servcies/cartservies";
 import valditejwt from "../middleware/jwtvaldite";
+import { createClient } from 'redis';
 
 const routercart = express.Router();
+const redis = createClient({
+  url: 'redis://127.0.0.1:6379'
+});
+
+// Connect to Redis
+redis.connect()
+  .then(() => console.log('Successfully connected to Redis'))
+  .catch(console.error);
+
+// Handle Redis connection errors
+redis.on('error', (err) => console.error('Redis Client Error', err));
 
 routercart.get("/", valditejwt, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -12,16 +24,12 @@ routercart.get("/", valditejwt, async (req: AuthenticatedRequest, res: Response)
         const activeCart = await getuseractivecard({ userid: userId });
         res.status(200).send(activeCart);
     } catch (error: any) {
-        console.error("GET /carts Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
 
 routercart.post("/", valditejwt, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        console.log("POST /carts Request Body:", req.body);
-        console.log("User from token:", req.user);
-        
         const userid = req.user._id;
         const { proudctid, quantity } = req.body;
         
@@ -36,7 +44,6 @@ routercart.post("/", valditejwt, async (req: AuthenticatedRequest, res: Response
         const proudct = await addnewproudct({ userid, proudctid, quantity });
         res.status(proudct.statuscode).send(proudct.data);
     } catch (error: any) {
-        console.error("POST /carts Error:", error);
         res.status(500).send({ 
             error: "Internal Server Error", 
             details: error.message,
@@ -52,7 +59,6 @@ routercart.put("/", valditejwt, async (req: AuthenticatedRequest, res: Response)
         const proudct = await updatecart({ userid, proudctid, quantity });
         res.status(proudct.statuscode).send(proudct.data);
     } catch (error: any) {
-        console.error("PUT /carts Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
@@ -64,7 +70,6 @@ routercart.delete("/", valditejwt, async (req: AuthenticatedRequest, res: Respon
         const proudct = await deleteitem({ userid, proudctid });
         res.status(proudct.statuscode).send(proudct.data);
     } catch (error: any) {
-        console.error("DELETE /carts/:id Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
@@ -75,7 +80,6 @@ routercart.delete("/all", valditejwt, async (req: AuthenticatedRequest, res: Res
         const proudct = await deleteAll(userid);
         res.status(proudct.statuscode).send(proudct.data);
     } catch (error: any) {
-        console.error("DELETE /carts/all Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
@@ -87,7 +91,6 @@ routercart.post("/complete", valditejwt, async (req: AuthenticatedRequest, res: 
         const proudct = await completeorder({ userid, address });
         res.status(proudct.statuscode).send(proudct.data);
     } catch (error: any) {
-        console.error("POST /carts/complete Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
@@ -98,10 +101,8 @@ routercart.get("/orders", valditejwt, async (req: AuthenticatedRequest, res: Res
         const orders = await getallcompletedorders({ userid });
         res.status(200).send(orders);
     } catch (error: any) {
-        console.error("GET /carts/orders Error:", error);
         res.status(500).send({ error: "Internal Server Error", details: error.message });
     }
 });
-
 
 export default routercart;

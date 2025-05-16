@@ -56,100 +56,111 @@ export const addnewproudct = async ({ userid,proudctid, quantity }: newproudct) 
       statuscode:400
     }
   }
-  cart.totalprice+= quantity*proudct.price
-  cart.items.push({
-    item: proudct._id,
-    quantity: quantity,
-    unitprice: proudct.price
-  });
-  const updtedcart = await cart.save()
-  const populatedCart = await Cartmodel.findById(updtedcart._id)
-  .populate({
+  
+  const updatedCart = await Cartmodel.findOneAndUpdate(
+    { _id: cart._id },
+    {
+      $push: {
+        items: {
+          item: proudct._id,
+          quantity: quantity,
+          unitprice: proudct.price
+        }
+      },
+      $inc: { totalprice: quantity * proudct.price }
+    },
+    { new: true }
+  ).populate({
     path: 'items.item',
     model: 'Products',
     select: 'name price image stock'
   });
-  return{
-    data:populatedCart,
-    statuscode:201
+
+  return {
+    data: updatedCart,
+    statuscode: 201
   }
 };
 
-export const updatecart=async({userid,proudctid,quantity}:newproudct)=>{
-  const cart= await getuseractivecard({userid})
-  const exiestpro= cart.items.find(p => p.item._id.toString()===proudctid)
+export const updatecart = async({userid,proudctid,quantity}:newproudct) => {
+  const cart = await getuseractivecard({userid})
+  const exiestpro = cart.items.find(p => p.item._id.toString()===proudctid)
   if(!exiestpro){
     return {
       data:'the proudct isnot there',
       statuscode:400
     }
   }
-  const proudct= await Productmodel.findById(proudctid)
+  const proudct = await Productmodel.findById(proudctid)
   if(!proudct){
     return {
       data:'the proudct isnot there',
       statuscode:400
     }
   }
-  if(proudct. stock<quantity){
+  if(proudct.stock < quantity){
     return {
       data:'item over stock',
       statuscode:400
     }
   }
-  cart.totalprice+= quantity*exiestpro.unitprice-exiestpro.unitprice*exiestpro.quantity
-  exiestpro.quantity=quantity
 
-  const updtedcart = await cart.save()
-  const populatedCart = await Cartmodel.findById(updtedcart._id)
-  .populate({
+  const priceDifference = (quantity * exiestpro.unitprice) - (exiestpro.quantity * exiestpro.unitprice);
+  
+  const updatedCart = await Cartmodel.findOneAndUpdate(
+    { 
+      _id: cart._id,
+      'items.item': proudctid 
+    },
+    {
+      $set: { 'items.$.quantity': quantity },
+      $inc: { totalprice: priceDifference }
+    },
+    { new: true }
+  ).populate({
     path: 'items.item',
     model: 'Products',
     select: 'name price image stock'
   });
-  return{
-    data:populatedCart,
-    statuscode:201
+
+  return {
+    data: updatedCart,
+    statuscode: 201
   }
-
 }
 
-export interface newproudctdelte{
-  userid:string,
-  proudctid:String,
-
+export interface newproudctdelte {
+  userid: string,
+  proudctid: String
 }
 
-
-export const deleteitem=async({userid,proudctid}:newproudctdelte)=>{
-  const cart= await getuseractivecard({userid})
-  const exiestpro= cart.items.find(p => p.item._id.toString()===proudctid)
+export const deleteitem = async({userid,proudctid}:newproudctdelte) => {
+  const cart = await getuseractivecard({userid})
+  const exiestpro = cart.items.find(p => p.item._id.toString()===proudctid)
   if(!exiestpro){
     return {
       data:'the proudct isnot there',
       statuscode:400
     }
   }
-  cart.items = cart.items.filter(p => p.item._id.toString() == proudctid);
-  cart.totalprice = cart.items.reduce(
-    (acc, p) => acc + p.quantity * p.unitprice,
-    0
-  );
 
-  const updtedcart = await cart.save()
-  const populatedCart = await Cartmodel.findById(updtedcart._id)
-  .populate({
+  const updatedCart = await Cartmodel.findOneAndUpdate(
+    { _id: cart._id },
+    {
+      $pull: { items: { item: proudctid } },
+      $inc: { totalprice: -(exiestpro.quantity * exiestpro.unitprice) }
+    },
+    { new: true }
+  ).populate({
     path: 'items.item',
     model: 'Products',
     select: 'name price image stock'
   });
-  
 
-  return{
-    data:populatedCart,
-    statuscode:201
+  return {
+    data: updatedCart,
+    statuscode: 201
   }
-
 }
 
 interface DeleteAllInput {
@@ -157,13 +168,13 @@ interface DeleteAllInput {
 }
 
 export const deleteAll = async ({ userid }: DeleteAllInput) => {
-  const cart = await getuseractivecard({ userid });
-
-  // Clear the items and reset total
-  cart.items = [];
-  cart.totalprice = 0;
-
-  const updatedCart = await cart.save();
+  const updatedCart = await Cartmodel.findOneAndUpdate(
+    { userid, status: 'active' },
+    {
+      $set: { items: [], totalprice: 0 }
+    },
+    { new: true }
+  );
 
   return {
     data: {
@@ -205,7 +216,7 @@ export const completeorder = async ({ userid, address }: completeorder) => {
       };
     }
 
-    const proudct = await Productmodel.findById(item.item); // فقط لجلب اسم المنتج والسعر
+    const proudct = await Productmodel.findById(item.item);
     if (!proudct) {
       return {
         data: 'Product not found',
@@ -229,8 +240,10 @@ export const completeorder = async ({ userid, address }: completeorder) => {
   });
 
   // ✅ تحديث حالة السلة
-  cart.status = statusenum.completd;
-  await cart.save();
+  await Cartmodel.findOneAndUpdate(
+    { _id: cart._id },
+    { $set: { status: statusenum.completd } }
+  );
 
   return {
     data: order,
@@ -238,12 +251,7 @@ export const completeorder = async ({ userid, address }: completeorder) => {
   };
 };
 
-
-
-
-
 export const getallcompletedorders=async({userid}:{userid:string})=>{
   const orders=await Ordermodel.find({userid})
   return orders
-
 }
